@@ -1,3 +1,7 @@
+import 'package:bartr_app/constants/AppButton.dart';
+import 'package:bartr_app/constants/AppColors.dart';
+import 'package:bartr_app/constants/AppText.dart';
+import 'package:bartr_app/constants/GapExtension.dart';
 import 'package:bartr_app/features/Screen_4/MatchingScreen.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +17,24 @@ class ConfirmLocationScreen extends StatelessWidget {
     required this.images,
   });
 
+  Widget _card({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.05),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,34 +43,27 @@ class ConfirmLocationScreen extends StatelessWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        title: const Text(
-          "Confirm Location",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: AppText(
+          text: "Confirm Location",
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+          fontSize: 22,
         ),
+        centerTitle: true,
       ),
 
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.all(20),
         child: SizedBox(
           height: 55,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
+          child: AppButton(
             onPressed: () {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const MatchingScreen()),
               );
             },
-            child: const Text(
-              "Confirm & Send",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            text: 'Confirm & Send',
           ),
         ),
       ),
@@ -58,106 +73,97 @@ class ConfirmLocationScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Verify where you need help",
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            AppText(
+              text: "Verify where you need help",
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
             ),
 
-            const SizedBox(height: 8),
+            8.gap,
 
-            Text(
-              "Please confirm your location before sending the request.",
-              style: TextStyle(color: Colors.grey.shade600),
+            AppText(
+              text: "Please confirm your location before sending the request.",
+              color: Colors.grey.shade600,
+              fontSize: 13,
             ),
 
-            const SizedBox(height: 28),
+            28.gap,
 
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-              ),
+            _card(
               child: Row(
                 children: [
                   Container(
-                    width: 56,
-                    height: 56,
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(.1),
+                      color: AppColors.primaryColor.withOpacity(.12),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.location_on,
-                      color: Colors.blue,
+                      color: AppColors.primaryColor,
                       size: 30,
                     ),
                   ),
-
-                  const SizedBox(width: 16),
-
-                  const Expanded(
+                  16.gap,
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Current Location",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                        AppText(
+                          text: "Current Location",
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
                         ),
-
-                        SizedBox(height: 4),
-
-                        Text("221B Baker Street"),
-
-                        Text("London NW1"),
-
-                        SizedBox(height: 6),
-
-                        Text(
-                          "Mock location",
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        5.gap,
+                        AppText(
+                          text: "Hingna Road",
+                          color: Colors.grey.shade600,
+                        ),
+                        AppText(
+                          text: "Nagpur MH 441110",
+                          color: Colors.grey.shade600,
                         ),
                       ],
                     ),
                   ),
+                  Icon(Icons.chevron_right, color: AppColors.primaryColor),
                 ],
               ),
             ),
 
-            const SizedBox(height: 28),
+            28.gap,
 
-            const Text(
-              "Request Summary",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            AppText(
+              text: "Request Summary",
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
             ),
 
-            const SizedBox(height: 16),
-
-            _summaryTile(
-              icon: Icons.category,
-              title: "Category",
-              value: category,
-            ),
-
-            const SizedBox(height: 16),
-
-            _summaryTile(
-              icon: Icons.description,
-              title: "Description",
-              value: description,
-            ),
-
-            const SizedBox(height: 16),
-
-            _summaryTile(
-              icon: Icons.photo_library,
-              title: "Attachments",
-              value: "${images.length} Photo${images.length == 1 ? "" : "s"}",
+            16.gap,
+            _card(
+              child: Column(
+                children: [
+                  _summaryTile(
+                    icon: Icons.category_outlined,
+                    title: "Category",
+                    value: category,
+                  ),
+                  const Divider(height: 28),
+                  _summaryTile(
+                    icon: Icons.notes_outlined,
+                    title: "Description",
+                    value: description,
+                  ),
+                  const Divider(height: 28),
+                  _summaryTile(
+                    icon: Icons.photo_library_outlined,
+                    title: "Photos",
+                    value: "${images.length} Attached",
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -179,27 +185,19 @@ class ConfirmLocationScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.blue),
-
-          const SizedBox(width: 16),
-
+          Icon(icon, color: AppColors.primaryColor),
+          16.gap,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(color: Colors.grey, fontSize: 13),
-                ),
-
-                const SizedBox(height: 4),
-
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
+                AppText(text: title, color: Colors.grey, fontSize: 13),
+                4.gap,
+                AppText(
+                  text: value,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
                 ),
               ],
             ),

@@ -12,31 +12,66 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.whiteColor,
-      borderRadius: BorderRadius.circular(45),
-      elevation: 2,
-      shadowColor: Colors.black12,
-      child: Ink(
-        decoration: BoxDecoration(gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(28)),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(45),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: AppColors.primaryColor.withOpacity(.1),
-                  child: Icon(category.icon, size: 34, color: AppColors.primaryColor),
-                ),
-                18.gap,
-                AppText(text: category.title, textAlign: TextAlign.center, fontSize: 17, fontWeight: FontWeight.w600),
-              ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(.08),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
             ),
-          ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 72,
+              width: 72,
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryColor.withOpacity(.19),
+                    blurRadius: 15,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  category.icon,
+                  size: 36,
+                  color: AppColors.primaryColor,
+                ),
+              ),
+            ),
+            18.gap,
+
+            Container(
+              height: 4,
+              width: 35,
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            18.gap,
+
+            AppText(
+              text: category.title,
+              textAlign: TextAlign.center,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppColors.blackColor,
+            ),
+          ],
         ),
       ),
     );

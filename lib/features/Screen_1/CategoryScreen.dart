@@ -1,5 +1,6 @@
 import 'package:bartr_app/features/Screen_1/CategoryModel.dart';
 import 'package:bartr_app/features/Screen_1/widgets/CategoryCard.dart';
+import 'package:bartr_app/features/Screen_2/describe_screen.dart';
 import 'package:flutter/material.dart';
 
 class CategoryScreen extends StatelessWidget {
@@ -56,7 +57,12 @@ class CategoryScreen extends StatelessWidget {
                     return CategoryCard(
                       category: category,
                       onTap: () {
-                        
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DescribeScreen(category: category),
+                          ),
+                        );
                       },
                     );
                   },

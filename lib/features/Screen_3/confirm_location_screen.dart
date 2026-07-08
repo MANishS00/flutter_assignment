@@ -1,3 +1,4 @@
+import 'package:bartr_app/features/Screen_4/MatchingScreen.dart';
 import 'package:flutter/material.dart';
 
 class ConfirmLocationScreen extends StatelessWidget {
@@ -39,12 +40,10 @@ class ConfirmLocationScreen extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              // Navigator.pushReplacement(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (_) => const MatchingScreen(),
-              //   ),
-              // );
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const MatchingScreen()),
+              );
             },
             child: const Text(
               "Confirm & Send",

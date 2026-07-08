@@ -1,3 +1,6 @@
+import 'package:bartr_app/constants/AppColors.dart';
+import 'package:bartr_app/constants/AppText.dart';
+import 'package:bartr_app/constants/GapExtension.dart';
 import 'package:bartr_app/features/Screen_1/CategoryModel.dart';
 import 'package:flutter/material.dart';
 
@@ -10,35 +13,29 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(22),
+      color: AppColors.whiteColor,
+      borderRadius: BorderRadius.circular(45),
       elevation: 2,
       shadowColor: Colors.black12,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(22),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 32,
-                backgroundColor: Colors.blue.withOpacity(.1),
-                child: Icon(category.icon, size: 34, color: Colors.blue),
-              ),
-
-              const SizedBox(height: 18),
-
-              Text(
-                category.title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
+      child: Ink(
+        decoration: BoxDecoration(gradient: AppColors.primaryGradient, borderRadius: BorderRadius.circular(28)),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(45),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundColor: Colors.blue.withOpacity(.1),
+                  child: Icon(category.icon, size: 34, color: Colors.blue),
                 ),
-              ),
-            ],
+                18.gap,
+                AppText(text: category.title, textAlign: TextAlign.center, fontSize: 17, fontWeight: FontWeight.w600),
+              ],
+            ),
           ),
         ),
       ),

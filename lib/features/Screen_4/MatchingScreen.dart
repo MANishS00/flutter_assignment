@@ -1,62 +1,48 @@
-import 'dart:async';
-
 import 'package:bartr_app/constants/AppButton.dart';
 import 'package:bartr_app/constants/AppColors.dart';
 import 'package:bartr_app/constants/AppText.dart';
 import 'package:bartr_app/constants/GapExtension.dart';
 import 'package:bartr_app/features/Screen_1/CategoryScreen.dart';
+import 'package:bartr_app/features/Screen_4/view_model/matching_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 
-class MatchingScreen extends StatefulWidget {
+class MatchingScreen extends StatelessWidget {
   const MatchingScreen({super.key});
 
   @override
-  State<MatchingScreen> createState() => _MatchingScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => MatchingViewModel(),
+      child: const MatchingView(),
+    );
+  }
 }
 
-class _MatchingScreenState extends State<MatchingScreen> {
-  bool _isSearching = true;
-  Timer? _timer;
+class MatchingView extends StatelessWidget {
+  const MatchingView({super.key});
 
-  @override
-  void initState() {
-    super.initState();
-
-    _timer = Timer(const Duration(seconds: 4), () {
-      if (!mounted) return;
-
-      setState(() {
-        _isSearching = false;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _goHome() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Request Successfully Sent 🎉"),
-        behavior: SnackBarBehavior.floating,
-      ),
+  void _goHome(BuildContext context, MatchingViewModel viewModel) {
+    viewModel.goHome(
+      onShowMessage: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Request Successfully Sent 🎉"),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      },
+      onNavigate: () {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const CategoryScreen()),
+          (route) => false,
+        );
+      },
     );
-
-    Future.delayed(const Duration(milliseconds: 700), () {
-      if (!mounted) return;
-
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const CategoryScreen()),
-        (route) => false,
-      );
-    });
   }
 
-  Future<void> _cancelRequest() async {
+  Future<void> _cancelRequest(BuildContext context) async {
     final cancel = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -133,13 +119,15 @@ class _MatchingScreenState extends State<MatchingScreen> {
       },
     );
 
-    if (cancel == true && mounted) {
+    if (cancel == true && context.mounted) {
       Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<MatchingViewModel>();
+
     return Scaffold(
       backgroundColor: const Color(0xffF7F8FC),
       appBar: AppBar(
@@ -148,8 +136,8 @@ class _MatchingScreenState extends State<MatchingScreen> {
         title: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: AppText(
-            key: ValueKey(_isSearching),
-            text: _isSearching ? "Finding Helper" : "Helper Found",
+            key: ValueKey(viewModel.isSearching),
+            text: viewModel.isSearching ? "Finding Helper" : "Helper Found",
             fontWeight: FontWeight.bold,
             color: Colors.black87,
             fontSize: 22,
@@ -160,14 +148,16 @@ class _MatchingScreenState extends State<MatchingScreen> {
         child: Center(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 700),
-            child: _isSearching ? _searchingView() : _matchedView(),
+            child: viewModel.isSearching
+                ? _searchingView(context, viewModel)
+                : _matchedView(context, viewModel),
           ),
         ),
       ),
     );
   }
 
-  Widget _searchingView() {
+  Widget _searchingView(BuildContext context, MatchingViewModel viewModel) {
     return Padding(
       key: const ValueKey("search"),
       padding: const EdgeInsets.all(24),
@@ -208,13 +198,16 @@ class _MatchingScreenState extends State<MatchingScreen> {
 
           const Spacer(),
 
-          AppButton.outline(text: "Cancel Request", onPressed: _cancelRequest),
+          AppButton.outline(
+            text: "Cancel Request",
+            onPressed: () => _cancelRequest(context),
+          ),
         ],
       ),
     );
   }
 
-  Widget _matchedView() {
+  Widget _matchedView(BuildContext context, MatchingViewModel viewModel) {
     return Padding(
       key: const ValueKey("matched"),
       padding: const EdgeInsets.all(24),
@@ -252,7 +245,6 @@ class _MatchingScreenState extends State<MatchingScreen> {
               ),
               child: Column(
                 children: [
-                  
                   const CircleAvatar(
                     radius: 40,
                     backgroundColor: AppColors.primaryColor,
@@ -308,9 +300,9 @@ class _MatchingScreenState extends State<MatchingScreen> {
                       children: [
                         Icon(Icons.location_on, color: AppColors.primaryColor),
                         6.gap,
-                        Text(
-                          "1.2 km Away",
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                        AppText(
+                          text: "1.2 km Away",
+                          fontWeight: FontWeight.w600,
                         ),
                       ],
                     ),
@@ -323,7 +315,10 @@ class _MatchingScreenState extends State<MatchingScreen> {
 
             SizedBox(
               width: double.infinity,
-              child: AppButton(text: "Continue", onPressed: _goHome),
+              child: AppButton(
+                text: "Continue",
+                onPressed: () => _goHome(context, viewModel),
+              ),
             ),
           ],
         ),

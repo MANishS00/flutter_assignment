@@ -29,8 +29,8 @@ class CategoryCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 32,
-                  backgroundColor: Colors.blue.withOpacity(.1),
-                  child: Icon(category.icon, size: 34, color: Colors.blue),
+                  backgroundColor: AppColors.primaryColor.withOpacity(.1),
+                  child: Icon(category.icon, size: 34, color: AppColors.primaryColor),
                 ),
                 18.gap,
                 AppText(text: category.title, textAlign: TextAlign.center, fontSize: 17, fontWeight: FontWeight.w600),

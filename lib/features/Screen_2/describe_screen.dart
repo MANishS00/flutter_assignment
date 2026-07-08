@@ -5,64 +5,29 @@ import 'package:bartr_app/constants/AppColors.dart';
 import 'package:bartr_app/constants/AppText.dart';
 import 'package:bartr_app/constants/GapExtension.dart';
 import 'package:bartr_app/features/Screen_1/CategoryModel.dart';
+import 'package:bartr_app/features/Screen_2/view_model/describe_view_model.dart';
 import 'package:bartr_app/features/Screen_3/confirm_location_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
-class DescribeScreen extends StatefulWidget {
+class DescribeScreen extends StatelessWidget {
   final CategoryModel category;
 
   const DescribeScreen({super.key, required this.category});
 
   @override
-  State<DescribeScreen> createState() => _DescribeScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => DescribeViewModel(category: category),
+      child: const DescribeView(),
+    );
+  }
 }
 
-class _DescribeScreenState extends State<DescribeScreen> {
-  final TextEditingController _descriptionController = TextEditingController();
-  final ImagePicker picker = ImagePicker();
-  List<XFile> selectedImages = [];
-  bool isRecording = false;
+class DescribeView extends StatelessWidget {
+  const DescribeView({super.key});
 
-  Future<void> pickFromGallery() async {
-    final images = await picker.pickMultiImage(imageQuality: 80);
-
-    if (images.isNotEmpty) {
-      setState(() {
-        selectedImages = images.take(3).toList();
-      });
-
-      if (images.length > 3 && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("You can upload a maximum of 3 images."),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> pickFromCamera() async {
-    if (selectedImages.length >= 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("You can upload a maximum of 3 images.")),
-      );
-      return;
-    }
-
-    final image = await picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 80,
-    );
-
-    if (image != null) {
-      setState(() {
-        selectedImages.add(image);
-      });
-    }
-  }
-
-  void showImagePickerSheet() {
+  void showImagePickerSheet(BuildContext context, DescribeViewModel viewModel) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -89,7 +54,10 @@ class _DescribeScreenState extends State<DescribeScreen> {
 
                 AppText(
                   text: "Upload Image",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
                 8.gap,
@@ -110,7 +78,13 @@ class _DescribeScreenState extends State<DescribeScreen> {
                         icon: Icons.photo_library_outlined,
                         onPressed: () {
                           Navigator.pop(context);
-                          pickFromGallery();
+                          viewModel.pickFromGallery(
+                            onError: (message) {
+                              ScaffoldMessenger.of(
+                                context,
+                              ).showSnackBar(SnackBar(content: Text(message)));
+                            },
+                          );
                         },
                       ),
                     ),
@@ -123,7 +97,13 @@ class _DescribeScreenState extends State<DescribeScreen> {
                         icon: Icons.camera_alt,
                         onPressed: () {
                           Navigator.pop(context);
-                          pickFromCamera();
+                          viewModel.pickFromCamera(
+                            onError: (message) {
+                              ScaffoldMessenger.of(
+                                context,
+                              ).showSnackBar(SnackBar(content: Text(message)));
+                            },
+                          );
                         },
                       ),
                     ),
@@ -138,43 +118,13 @@ class _DescribeScreenState extends State<DescribeScreen> {
     );
   }
 
-  Future<void> startRecording() async {
-    if (isRecording) return;
-    setState(() {
-      isRecording = true;
-    });
-    await Future.delayed(const Duration(seconds: 3));
-    _descriptionController.text =
-        "I need help fixing a leaking tap in my kitchen.";
-    setState(() {
-      isRecording = false;
-    });
-  }
-
-  bool get canContinue => _descriptionController.text.trim().isNotEmpty;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _descriptionController.addListener(() {
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
   Widget buildCard({required Widget child}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25),
           bottomRight: Radius.circular(25),
         ),
@@ -192,6 +142,8 @@ class _DescribeScreenState extends State<DescribeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<DescribeViewModel>();
+
     return Scaffold(
       backgroundColor: const Color(0xffF7F8FC),
 
@@ -200,7 +152,7 @@ class _DescribeScreenState extends State<DescribeScreen> {
         backgroundColor: Colors.transparent,
         centerTitle: true,
         title: AppText(
-          text: widget.category.title,
+          text: viewModel.category.title,
           fontWeight: FontWeight.bold,
           color: Colors.black87,
           fontSize: 22,
@@ -240,7 +192,7 @@ class _DescribeScreenState extends State<DescribeScreen> {
                     ),
                     15.gap,
                     TextField(
-                      controller: _descriptionController,
+                      controller: viewModel.descriptionController,
                       maxLines: 6,
                       decoration: InputDecoration(
                         hintText:
@@ -260,7 +212,7 @@ class _DescribeScreenState extends State<DescribeScreen> {
               24.gap,
 
               GestureDetector(
-                onTap: startRecording,
+                onTap: viewModel.startRecording,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
 
@@ -270,14 +222,14 @@ class _DescribeScreenState extends State<DescribeScreen> {
                   ),
 
                   decoration: BoxDecoration(
-                    color: isRecording
+                    color: viewModel.isRecording
                         ? Colors.red.shade50
                         : Colors.blue.shade50,
 
                     borderRadius: BorderRadius.circular(50),
 
                     border: Border.all(
-                      color: isRecording ? Colors.red : Colors.blue,
+                      color: viewModel.isRecording ? Colors.red : Colors.blue,
                     ),
                   ),
 
@@ -285,20 +237,24 @@ class _DescribeScreenState extends State<DescribeScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       AnimatedScale(
-                        scale: isRecording ? 1.2 : 1,
+                        scale: viewModel.isRecording ? 1.2 : 1,
                         duration: const Duration(milliseconds: 500),
                         child: Icon(
-                          isRecording ? Icons.mic : Icons.mic_none,
-                          color: isRecording ? Colors.red : Colors.blue,
+                          viewModel.isRecording ? Icons.mic : Icons.mic_none,
+                          color: viewModel.isRecording
+                              ? Colors.red
+                              : Colors.blue,
                         ),
                       ),
 
                       10.gap,
 
                       AppText(
-                        text: isRecording ? "Recording..." : "Start Recording",
+                        text: viewModel.isRecording
+                            ? "Recording..."
+                            : "Start Recording",
                         fontWeight: FontWeight.w600,
-                        color: isRecording ? Colors.red : Colors.blue,
+                        color: viewModel.isRecording ? Colors.red : Colors.blue,
                       ),
                     ],
                   ),
@@ -319,15 +275,15 @@ class _DescribeScreenState extends State<DescribeScreen> {
                     15.gap,
                     AppButton.outline(
                       text: "Add Photos",
-                      onPressed: showImagePickerSheet,
+                      onPressed: () => showImagePickerSheet(context, viewModel),
                     ),
 
-                    if (selectedImages.isNotEmpty) ...[
+                    if (viewModel.selectedImages.isNotEmpty) ...[
                       20.gap,
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: selectedImages.length,
+                        itemCount: viewModel.selectedImages.length,
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 3,
@@ -340,7 +296,7 @@ class _DescribeScreenState extends State<DescribeScreen> {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
                                 child: Image.file(
-                                  File(selectedImages[index].path),
+                                  File(viewModel.selectedImages[index].path),
                                   width: double.infinity,
                                   height: double.infinity,
                                   fit: BoxFit.cover,
@@ -350,11 +306,7 @@ class _DescribeScreenState extends State<DescribeScreen> {
                                 top: 5,
                                 right: 5,
                                 child: InkWell(
-                                  onTap: () {
-                                    setState(() {
-                                      selectedImages.removeAt(index);
-                                    });
-                                  },
+                                  onTap: () => viewModel.removeImageAt(index),
                                   child: Container(
                                     decoration: const BoxDecoration(
                                       color: Colors.red,
@@ -390,7 +342,7 @@ class _DescribeScreenState extends State<DescribeScreen> {
           child: AppButton(
             text: "Continue",
             onPressed: () {
-              if (!canContinue) {
+              if (!viewModel.canContinue) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Please give description.")),
                 );
@@ -400,9 +352,11 @@ class _DescribeScreenState extends State<DescribeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (_) => ConfirmLocationScreen(
-                    category: widget.category.title,
-                    description: _descriptionController.text.trim(),
-                    images: selectedImages.map((e) => e.path).toList(),
+                    category: viewModel.category.title,
+                    description: viewModel.descriptionController.text.trim(),
+                    images: viewModel.selectedImages
+                        .map((e) => e.path)
+                        .toList(),
                   ),
                 ),
               );

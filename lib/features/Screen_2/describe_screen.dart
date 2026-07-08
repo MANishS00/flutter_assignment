@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bartr_app/features/Screen_1/CategoryModel.dart';
+import 'package:bartr_app/features/Screen_3/confirm_location_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -229,7 +230,18 @@ class _DescribeScreenState extends State<DescribeScreen> {
           child: ElevatedButton(
             onPressed: _descriptionController.text.trim().isEmpty
                 ? null
-                : () {},
+                : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ConfirmLocationScreen(
+                          category: widget.category.title,
+                          description: _descriptionController.text.trim(),
+                          images: selectedImages.map((e) => e.path).toList(),
+                        ),
+                      ),
+                    );
+                  },
             child: const Text("Send Request"),
           ),
         ),

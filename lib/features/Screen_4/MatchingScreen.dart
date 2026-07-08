@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import 'package:bartr_app/constants/AppButton.dart';
+import 'package:bartr_app/constants/AppColors.dart';
+import 'package:bartr_app/constants/AppText.dart';
+import 'package:bartr_app/constants/GapExtension.dart';
 import 'package:bartr_app/features/Screen_1/CategoryScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -55,22 +59,76 @@ class _MatchingScreenState extends State<MatchingScreen> {
   Future<void> _cancelRequest() async {
     final cancel = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Cancel Request?"),
-          content: const Text(
-            "Are you sure you want to cancel finding a Helper?",
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text("No"),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.red,
+                    size: 36,
+                  ),
+                ),
+
+                20.gap,
+
+                AppText(
+                  text: "Cancel Request?",
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+
+                12.gap,
+
+                AppText(
+                  text:
+                      "Are you sure you want to cancel finding a helper?\nYour request will not be sent.",
+                  textAlign: TextAlign.center,
+                  color: Colors.grey.shade600,
+                ),
+
+                28.gap,
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppButton.outline(
+                        text: "Keep Search",
+                        onPressed: () {
+                          Navigator.pop(context, false);
+                        },
+                      ),
+                    ),
+
+                    12.gap,
+
+                    Expanded(
+                      child: AppButton(
+                        text: "Cancel",
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text("Yes"),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -84,7 +142,20 @@ class _MatchingScreenState extends State<MatchingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF7F8FC),
-      appBar: AppBar(title: const Text("Finding Helper"), centerTitle: true),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
+        title: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: AppText(
+            key: ValueKey(_isSearching),
+            text: _isSearching ? "Finding Helper" : "Helper Found",
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            fontSize: 22,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: AnimatedSwitcher(
@@ -105,139 +176,156 @@ class _MatchingScreenState extends State<MatchingScreen> {
           const Spacer(),
 
           SizedBox(
-            height: 250,
+            height: 230,
             child: Lottie.asset("assets/lottie/Search.json", repeat: true),
           ),
+          25.gap,
+          AppText(
+            text: "Finding Nearby Helpers",
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+          ),
+          12.gap,
 
-          const SizedBox(height: 20),
-
-          const Text(
-            "Finding Nearby Helpers",
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          AppText(
+            text:
+                "We're notifying nearby helpers.\nThis usually takes less than a minute.",
+            textAlign: TextAlign.center,
+            color: Colors.grey.shade600,
+            fontSize: 15,
           ),
 
-          const SizedBox(height: 12),
+          30.gap,
 
-          Text(
-            "Notifying nearby Helpers...",
-            style: TextStyle(color: Colors.grey.shade700, fontSize: 16),
+          LinearProgressIndicator(
+            minHeight: 8,
+            borderRadius: BorderRadius.circular(20),
+            backgroundColor: Colors.grey.shade300,
+            color: AppColors.primaryColor,
           ),
 
-          const SizedBox(height: 8),
-
-          Text(
-            "This usually takes only a few seconds.",
-            style: TextStyle(color: Colors.grey.shade500),
-          ),
+          25.gap,
 
           const Spacer(),
 
-          OutlinedButton(
-            onPressed: _cancelRequest,
-            child: const Text("Cancel"),
-          ),
-
-          const SizedBox(height: 20),
+          AppButton.outline(text: "Cancel Request", onPressed: _cancelRequest),
         ],
       ),
     );
   }
 
   Widget _matchedView() {
-    return Center(
+    return Padding(
       key: const ValueKey("matched"),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: TweenAnimationBuilder<double>(
-          duration: const Duration(milliseconds: 600),
-          tween: Tween(begin: 0, end: 1),
-          builder: (context, value, child) {
-            return Transform.translate(
-              offset: Offset(0, 80 * (1 - value)),
-              child: Opacity(opacity: value, child: child),
-            );
-          },
-          child: Card(
-            elevation: 5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+      padding: const EdgeInsets.all(24),
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 900),
+        curve: Curves.easeOutBack,
+        tween: Tween(begin: 0, end: 1),
+        builder: (context, value, child) {
+          return Opacity(
+            opacity: value.clamp(0.0, 1.0),
+            child: Transform.translate(
+              offset: Offset(0, 120 * (1 - value)),
+              child: Transform.scale(
+                scale: 0.85 + (0.15 * value),
+                child: child,
+              ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
+          );
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(.05),
+                    blurRadius: 15,
+                  ),
+                ],
+              ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
+                  
                   const CircleAvatar(
-                    radius: 45,
-                    backgroundColor: Colors.blue,
-                    child: Icon(Icons.person, size: 50, color: Colors.white),
+                    radius: 40,
+                    backgroundColor: AppColors.primaryColor,
+                    child: Icon(
+                      Icons.person,
+                      size: 42,
+                      color: AppColors.whiteColor,
+                    ),
                   ),
 
-                  const SizedBox(height: 20),
+                  15.gap,
 
-                  const Text(
-                    "🎉 Helper Found",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  AppText(
+                    text: " Rajesh Kumar ",
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
                   ),
 
-                  const SizedBox(height: 20),
-
-                  const Text(
-                    "Sarah Johnson",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                  8.gap,
+                  AppText(
+                    text: " +91 9876543210 ",
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
                   ),
+                  9.gap,
 
-                  const SizedBox(height: 8),
-
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.star, color: Colors.orange),
-
-                      SizedBox(width: 6),
-
-                      Text(
-                        "4.8",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-
-                      SizedBox(width: 10),
-
-                      Text("23 Jobs"),
+                      Icon(Icons.star, color: Colors.orange.shade400),
+                      5.gap,
+                      AppText(text: "4.8", fontWeight: FontWeight.bold),
+                      15.gap,
+                      const Icon(Icons.work_outline, size: 18),
+                      const SizedBox(width: 5),
+                      AppText(text: "23 Jobs"),
                     ],
                   ),
 
-                  const SizedBox(height: 12),
+                  15.gap,
 
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.location_on, color: Colors.red),
-
-                      SizedBox(width: 4),
-
-                      Text("1.2 km Away"),
-                    ],
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _goHome,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: const Text("Continue"),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColor.withOpacity(.08),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.location_on, color: AppColors.primaryColor),
+                        6.gap,
+                        Text(
+                          "1.2 km Away",
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ),
+
+            35.gap,
+
+            SizedBox(
+              width: double.infinity,
+              child: AppButton(text: "Continue", onPressed: _goHome),
+            ),
+          ],
         ),
       ),
     );
